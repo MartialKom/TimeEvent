@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content="">
+    <meta name="author" content="">
+
+    <title>Register</title>
+
+    <link href="web/css/sb-admin-2.css" rel="stylesheet">
+    <link rel="stylesheet" type="text/css" href="assets/css/animate.css">
+
+</head>
+
+<div class="row animated fadeIn page-content ">
+<body class="bg-gradient-primary" style="background-image: url('web/agenda.jpg');">
+
+    <div class="container">
+
+        <div class="card o-hidden border-0 shadow-lg my-5">
+            <div class="card-body p-0">
+                <!-- Nested Row within Card Body -->
+                <div class="row">
+                    <img src="web/applis-agenda.jpg" class="col-lg-5 d-lg-block">
+                    <div class="col-lg-7">
+                        <div class="p-5">
+                            <div class="text-center">
+                                <h1 class="h4 text-gray-900 mb-4">Créer un compte!</h1>
+                            </div>
+                            <form class="user" th:action="@{/inscription}" th:object="${user}" method ="POST">
+                            <div class="form-group">                              
+                                        <div class = "alert alert-danger animated shake"  th:if="${erreur !=null}">
+                                        <center><p th:text="${erreur}"> Erreur</p></center>
+                                        </div>
+                                        
+                                          <div class = "alert alert-success animated shake"  th:if="${result !=null}">
+                                        <center><p th:text="${result}"> Réussie</p></center>
+                                        </div>
+                                		</div>
+                            
+                                <div class="form-group row"> 
+                                		
+                                    <div class="col-sm-6 mb-3 mb-sm-0">
+                                        <input type="text" class="form-control form-control-user" id="exampleFirstName"
+                                            placeholder="Nom" name="nom" required>
+                                    </div>
+                                    <div class="col-sm-6">
+                                        <input type="text" class="form-control form-control-user" id="exampleLastName"
+                                            placeholder="Prenom" name="prenom" required>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <input type="email" class="form-control form-control-user" id="exampleInputEmail"
+                                        placeholder=" Adresse Email" name="mail" required>
+                                </div>
+                                <div class="form-group row">
+                                    <div class="col-sm-6 mb-3 mb-sm-0">
+                                        <input type="password" class="form-control form-control-user"
+                                            id="exampleInputPassword" placeholder="Mot de passe" name="password" required>
+                                    </div>
+                                    <div class="col-sm-6">
+                                        <input type="password" class="form-control form-control-user"
+                                            id="exampleRepeatPassword" placeholder="confirmer le mot de passe" name="cpass" required>
+                                    </div>
+                                </div>
+                                <button type="submit" class="btn btn-primary btn-user btn-block">
+                                    Eregistrer
+                                </button>
+                            </form>
+                            <hr>
+                            <div class="text-center">
+                                <a class="small" th:href="@{/}">Avez-vous déjà un compte? Connexion!</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</body>
+</div>
+</html>

@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content="">
+    <meta name="author" content="">
+
+    <title>Dashboard</title>
+
+    <!-- Custom fonts for this template-->
+    <link href="web/fontawesome-free/css/all.min.css" rel="stylesheet" type="text/css">
+    <link href="web/css/sb-admin-2.min.css" rel="stylesheet">
+
+</head>
+
+<body id="page-top">
+
+    <!-- Page complete -->
+    <div id="wrapper">
+
+        <!-- Sidebar -->
+        <ul class="navbar-nav sidebar sidebar-dark bg-gradient-secondary " id="accordionSidebar" >
+
+            <!-- Sidebar - profile -->
+            <a class="d-flex align-items-center justify-content-center" href="#">
+                <div class="sidebar-brand-text mx-3" >
+                <p style="color: rgb(248,203,173);"><b><i>TimeEvent</i></b></p>
+
+            </div>
+            </a>
+            <div class="d-flex align-items-center justify-content-center" style="margin-top: 30px;">
+                 <p style="color: rgb(190,217,239);" th:text="'BIENVENUE '+${user.prenom}">BIENVENUE Martial</p>
+            </div>
+
+            <!-- trait -->
+            <hr class="sidebar-divider my-0">
+
+            <!-- action-->
+            <div class="d-flex align-items-center justify-content-center" style="margin-top: 100px;">
+                <a class="btn btn-info" href="#"><i class="fas fa-fw fa-file"></i>
+                    <span>Consulter l'agenda</span></a>
+            </div>
+            <div class="d-flex align-items-center justify-content-center" style="margin-top: 100px;">
+                <a class="btn btn-info" href="/ajouter"><i class="fas fa-fw fa-folder"></i>
+                    <span>Ajouter évènement</span></a>
+            </div>
+            <div class="d-flex justify-content-center" style="margin-top: 50%;">
+                <p style="color: rgb(217,217,217);"><span>email:</span></p>
+            </div>
+            <div class="d-flex justify-content-center" >
+                 <p  style="color: rgb(217,217,217);"><span th:text="${user.mail}">martialkom123@gmail.com</span></p>
+            </div>
+            <!-- Message -->
+            <div class="sidebar-card d-none d-lg-flex" style="margin-top: 30%;">
+               
+                <p class="text-center mb-2" style="color: rgb(248,203,173);">Soyez plus productif , planifiez vos évènements avec TimeEvent</p>
+            </div>
+		 <div class="d-flex  justify-content-center" style="margin-top:10px;">
+                    <a class="btn btn-warning active" href="/deconnecter">
+                        <span>Deconnexion</span></a>
+                </div>
+        </ul>
+        <!-- End of Sidebar -->
+
+        <!-- Content Wrapper -->
+        <div id="content-wrapper" class="d-flex flex-column">
+
+            <!-- Main Content -->
+            <div id="content">
+
+                <!-- Topbar -->
+                <nav class="navbar navbar-expand navbar-light topbar mb-4 static-top shadow" style="background-color: rgb(197,197,197);">
+
+                    <!-- Sidebar Toggle -->
+                    <button id="sidebarToggleTop" class="btn btn-link d-md-none rounded-circle mr-3">
+                        <i class="fa fa-bars"></i>
+                    </button>
+
+                    <!-- Topbar-->
+                    <form
+                        class="d-none d-sm-inline-block form-inline mr-auto ml-md-3 my-2 my-md-0 mw-100 navbar-search" method="POST" action="/getEvents">
+                        <div class=" input-group">
+                            <label  class="col-md-5 form-label text-gray-900"><b><i>Choisissez le mois:</i></b> </label>
+                             <select name="mois">
+                             <option th:each="m : ${Listmois}" th:text="${m}">mois1</option>
+                             </select>
+                             <div class="col-xl-3">
+                                 <button type="submit" class="btn btn-warning text-gray-900">Afficher</button>
+                             </div>
+                            
+                        </div>
+
+                    </form>
+                </nav>
+                <!-- End of Topbar -->
+
+                <!-- Begin Page Content -->
+                <div class="container-fluid">
+				<center><h3 th:text=" 'Events of '+${mois}">Events</h3></center>
+                    <!-- Contenu -->
+                    <!-- premier ligne -->
+				<div th:if="${events==null or events.size()==0}">
+				<center><h5>Aucun evenements</h5></center>
+				</div>
+                    <div class="row" th:if="${events!=null and events.size()!=0}">
+                        <div class="col-xl-3 col-lg-3" th:each="evenement : ${events}">
+                            <div class="card shadow mb-4">
+                          
+                                <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                                    <h6 class="m-0 font-weight-bold"><span style="margin-left: 13vh" th:text="${evenement.getDate()}">1</span></h6>
+                                </div>
+                                <!-- Cardre Body -->
+                                
+                                <div class="d-flex align-items-center justify-content-center">
+                                   <a th:href="@{/afficher(id=${evenement.getId()})}"> <button class="btn btn-success" style="margin: 15px; color: gray;"  th:text="${evenement.getTitre()}">
+                                        Evènement
+                                    </button></a>
+          
+                                </div>
+                            </div>
+                        </div>
+ 
+                    </div>
+</body>
+
+</html>
