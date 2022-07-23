@@ -46,7 +46,7 @@ id_utilisateur int not null);
 
 # DEPLOIEMENT
 
-* Copiez le fichier jar qui est dans le dossier target, et executer le jar avec la commande java -jar kom-0.0.1-SNAPSHOT.jar 
+* Copiez le fichier jar présent dans le dossier du projet, et executer le avec la commande : <b>java -jar kom-0.0.1-SNAPSHOT.jar</b>
 
 * L'application sera déployé sur le port 3000: vous pourez vous connecter via votre navigateur avec ce lien (http://localhost:3000)
 
