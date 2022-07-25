@@ -5,6 +5,8 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Locale;
 
+import javax.servlet.http.HttpServletRequest;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
@@ -15,6 +17,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.w3c.dom.html.HTMLTableCaptionElement;
 
 import com.agenda.kom.model.Evenement;
 import com.agenda.kom.model.Utilisateur;
@@ -24,7 +27,7 @@ import com.agenda.kom.service.UtilisateurService;
 
 @Controller
 public class AgendaController {
-	public ArrayList<Evenement> evenements;
+
 	
 	@Autowired
 	private UtilisateurService utilisateurService;
@@ -32,7 +35,7 @@ public class AgendaController {
 	@Autowired
 	private EvenementService evenementService;
 	
-	Utilisateur  u = new Utilisateur();
+
 	
 	static ArrayList<String> listMois = new ArrayList<>();
 	
@@ -76,7 +79,7 @@ public class AgendaController {
 	
 	
 	@PostMapping("/connexion")
-	public String connexion(@RequestParam String mail, @RequestParam String pass, ModelMap modelmap) 
+	public String connexion(@RequestParam String mail, @RequestParam String pass, ModelMap modelmap, HttpServletRequest request) 
 	{
 		
 		//On vérifie si les identifiants sont faux
@@ -92,12 +95,12 @@ public class AgendaController {
 			System.out.println("l'utilisateur existe");
 			
 			// On recupere toutes les données de l'utilisateur qui vient de se connecter
-			u = utilisateurService.getUtilisateur(mail, pass).get();
+			Utilisateur u1  = utilisateurService.getUtilisateur(mail, pass).get();
 			
-			System.out.println("Je l'ai récupéré: "+u.getPrenom());
+			System.out.println("Je l'ai récupéré: "+u1.getPrenom());
 			
-			if(evenements!=null)evenements.clear();
-			evenements = evenementService.refresh(u.getId());
+			//if(evenements!=null)evenements.clear();
+			ArrayList<Evenement> evenements1 = evenementService.refresh(u1.getId());
 			
 			ArrayList<Evenement> array = new ArrayList<>();
 			
@@ -105,7 +108,7 @@ public class AgendaController {
 			String[] int_date = new String[3];
 			// On recupere juste les evenements d'un mois et on les mets dans "array"
 			
-			for(Evenement event: evenements) 
+			for(Evenement event: evenements1) 
 			{
 				int_date = event.getDate().split("-");
 				LocalDate local =LocalDate.of(Integer.parseInt(int_date[0]), Integer.parseInt(int_date[1]),Integer.parseInt(int_date[2]));
@@ -126,8 +129,9 @@ public class AgendaController {
 			}
 			
 			System.out.println("Taille des evenements: "+array.size());
-			modelmap.put("user", u); // on envoi toutes les données de l'user
-			modelmap.put("events", array); //On envoi la série d'évennement du mois courant 
+			request.getSession().setAttribute("user", u1);
+			request.getSession().setAttribute("evenements", evenements1);
+			modelmap.put("events", array);
 			modelmap.put("mois", LocalDate.now().getMonth().toString());
 			modelmap.put("Listmois", listMois);
 
@@ -137,13 +141,15 @@ public class AgendaController {
 	
 
 	@GetMapping("/consulter")
-	public String consulter(ModelMap modelmap) 
+	public String consulter(ModelMap modelmap, HttpServletRequest request) 
 	{
 		
-		if(evenements==null || u == null) return "error";
 		
-		evenements.clear();
-		evenements = evenementService.refresh(u.getId());
+		if(request.getSession().getAttribute("evenements")==null || request.getSession().getAttribute("user") == null) return "error";
+		
+		Utilisateur u = (Utilisateur) request.getSession().getAttribute("user");
+		
+		ArrayList<Evenement>  evenements = evenementService.refresh(u.getId());
 		
 		ArrayList<Evenement> array = new ArrayList<>();
 		
@@ -165,7 +171,7 @@ public class AgendaController {
 		}
 		
 		System.out.println("Taille des evenements: "+array.size());
-		modelmap.put("user", u); // on envoi toutes les données de l'user
+		request.getSession().setAttribute("evenements", evenements);
 		modelmap.put("events", array); //On envoi la série d'évennement du mois courant 
 		modelmap.put("mois", LocalDate.now().getMonth().toString());
 		modelmap.put("Listmois", listMois);
@@ -179,10 +185,10 @@ public class AgendaController {
 	
 	
 	@PostMapping("/getEvents")
-	public String getEvenements(@RequestParam String mois, ModelMap modelmap) 
+	public String getEvenements(@RequestParam String mois, ModelMap modelmap, HttpServletRequest request) 
 	{
-		evenements.clear();
-		evenements = evenementService.refresh(u.getId());
+		Utilisateur u = (Utilisateur) request.getSession().getAttribute("user");
+		ArrayList<Evenement> evenements = evenementService.refresh(u.getId());
 		
 		ArrayList<Evenement> array = new ArrayList<>();
 		
@@ -204,7 +210,7 @@ public class AgendaController {
 		}
 		
 		System.out.println("Taille des evenements: "+array.size());
-		modelmap.put("user", u); // on envoi toutes les données de l'user
+		request.getSession().setAttribute("evenements", evenements);
 		modelmap.put("events", array); //On envoi la série d'évennement du mois courant 
 		modelmap.put("mois", mois);
 		modelmap.put("Listmois", listMois);
@@ -213,35 +219,39 @@ public class AgendaController {
 	}
 	
 	@GetMapping("/ajouter")
-	public String ajouterE(ModelMap modelmap) 
+	public String ajouterE(ModelMap modelmap, HttpServletRequest request) 
 	{
-		if(evenements==null || u == null) return "error";
+		if(request.getSession().getAttribute("evenements")==null || request.getSession().getAttribute("user")==null) return "error";
 		
-		modelmap.put("user", u);
+		
 		return "evenement";
 	}
 	
 	@PostMapping("/addEvent")
-	public String addEvent(@ModelAttribute("event")Evenement event, ModelMap modelmap) 
+	public String addEvent(@ModelAttribute("event")Evenement event, ModelMap modelmap, HttpServletRequest request) 
 	{
-		
+		Utilisateur u = (Utilisateur) request.getSession().getAttribute("user");
 		event.setId_U(u.getId());
 		evenementService.enregistrerEvent(event);
 		
-		evenements.clear();
-		evenements = evenementService.refresh(u.getId());
+		
+		ArrayList<Evenement> evenements = evenementService.refresh(u.getId());
 		
 		
 		modelmap.put("result", "L'evenement à été ajouté");
-		modelmap.put("user", u);
+		request.getSession().setAttribute("evenements", evenements);
 		return "evenement";
 	}
 	
 	
 	@GetMapping("/afficher")
-	public String eventDescription(@RequestParam Long id, ModelMap modelmap) 
+	public String eventDescription(@RequestParam Long id, ModelMap modelmap, HttpServletRequest request) 
 	{	
-		if(evenements==null || u == null || !evenementService.getEvenementByIDAndIDu(id, u.getId()).isPresent()) return "error";
+		if(request.getSession().getAttribute("evenements")==null || request.getSession().getAttribute("user")==null) return "error";
+		
+		Utilisateur u = (Utilisateur) request.getSession().getAttribute("user");
+		
+		if(!evenementService.getEvenementByIDAndIDu(id, u.getId()).isPresent()) return "error";
 		
 		Evenement e = new Evenement();
 		LocalDate local = null;
@@ -253,7 +263,7 @@ public class AgendaController {
 		
 		modelmap.put("event", e);
 		modelmap.put("date", date);
-		modelmap.put("user", u);
+		
 		return "description";
 
 	}
@@ -261,9 +271,15 @@ public class AgendaController {
 
 	
 	@GetMapping("/delete")
-	public String deleteEvent(@RequestParam Long id, ModelMap modelmap) {
+	public String deleteEvent(@RequestParam Long id, ModelMap modelmap, HttpServletRequest request) {
 		
-		if(evenements==null || u == null || !evenementService.getEvenementByIDAndIDu(id, u.getId()).isPresent()) return "error";
+		if(request.getSession().getAttribute("evenements")==null) return "error";
+		
+		Utilisateur u = (Utilisateur) request.getSession().getAttribute("user");
+		
+		if(!evenementService.getEvenementByIDAndIDu(id, u.getId()).isPresent()) return "error";
+		
+		ArrayList<Evenement> evenements = evenementService.refresh(u.getId());
 		
 		for(Evenement event: evenements) 
 		{
@@ -288,7 +304,7 @@ public class AgendaController {
 					  
 				 }
 				
-				 modelmap.put("user", u); // on envoi toutes les données de l'user
+				request.getSession().setAttribute("evenements", evenements);
 				 modelmap.put("event", array); //On envoi la série d'évennement du mois courant 
 				 modelmap.put("mois", LocalDate.now().getMonth().toString());
 				 modelmap.put("Listmois", listMois);
@@ -302,21 +318,25 @@ public class AgendaController {
 	
 	
 	@GetMapping("/modifier")
-	public String modif(@RequestParam Long id, ModelMap modelmap) 
+	public String modif(@RequestParam Long id, ModelMap modelmap, HttpServletRequest request) 
 	{
-		if(evenements==null || u == null || !evenementService.getEvenementByIDAndIDu(id, u.getId()).isPresent() ) return "error";
+		if(request.getSession().getAttribute("evenements")==null) return "error";
+		
+		Utilisateur u = (Utilisateur) request.getSession().getAttribute("user");
+		
+		if(!evenementService.getEvenementByIDAndIDu(id, u.getId()).isPresent()) return "error";
 		
 		Evenement e = evenementService.getEvenementByIDAndIDu(id, u.getId()).get();
 		
 		modelmap.put("event", e);
-		modelmap.put("user", u);
 		return "modifEvent";
 	}
 	
 	@PostMapping("/update")
-	public String updateEvent(@RequestParam Long id, @ModelAttribute("evenement") Evenement event,  ModelMap modelmap) {
+	public String updateEvent(@RequestParam Long id, @ModelAttribute("evenement") Evenement event,  ModelMap modelmap, HttpServletRequest request) {
 		
 		event.setId(id);
+		Utilisateur u = (Utilisateur) request.getSession().getAttribute("user");
 		event.setId_U(u.getId());
 		
 		Evenement savedEvent = evenementService.enregistrerEvent(event);
@@ -332,12 +352,12 @@ public class AgendaController {
 	}
 	
 	@GetMapping("/deconnecter")
-	public String deconnexion() {
+	public String deconnexion(HttpServletRequest request) {
 		
-		if(evenements==null || u == null) return "error";
+		if(request.getSession().getAttribute("evenements")==null ||request.getSession().getAttribute("user")==null) return "error";
 		
-		evenements = null;
-		u=null;
+		request.getSession().setAttribute("evenements", null);
+		request.getSession().setAttribute("user", null);
 		return "login";
 	}
 	
